@@ -1,190 +1,138 @@
 import 'package:flutter/material.dart';
+import 'tela_login.dart'; // Certifique-se de importar corretamente
 
-class TelaInicial extends StatefulWidget {
-  const TelaInicial({Key? key}) : super(key: key);
+class TelaZInicial extends StatelessWidget {
+  const TelaZInicial({super.key});
 
-  @override
-  State<TelaInicial> createState() => _TelaInicialState();
-}
-
-class _TelaInicialState extends State<TelaInicial> {
-  bool _mostrarConfirmacaoSaida = false;
-
-  void _confirmarSaida() {
-    setState(() {
-      _mostrarConfirmacaoSaida = true;
-    });
+  void _mostrarConfirmacaoLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Color(0xFFD9AFFF),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                width: double.infinity,
+                child: Text(
+                  "DESEJA REALMENTE SAIR?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'CinzelDecorative',
+                    fontSize: 18,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Image.asset('assets/images/saude.png', height: 60),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => TelaLogin()),
+                        (route) => false,
+                      );
+                    },
+                    child: const Text("SIM",
+                        style: TextStyle(
+                            fontFamily: 'Vollkorn',
+                            fontSize: 16,
+                            color: Colors.black)),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("NÃO",
+                        style: TextStyle(
+                            fontFamily: 'Vollkorn',
+                            fontSize: 16,
+                            color: Colors.black)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
-  void _sair() {
-    // Aqui você pode colocar a lógica para sair do app ou voltar para o login
-    Navigator.pop(context);
+  Widget _botao(String texto, {VoidCallback? onPressed}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xFFF0C8FF),
+          foregroundColor: Colors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+        ),
+        onPressed: onPressed,
+        child: Text(
+          texto,
+          style: const TextStyle(
+            fontFamily: 'Vollkorn',
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.purple[200],
+      backgroundColor: Color(0xFFF6F4F7),
       body: Center(
-        child: Stack(
-          alignment: Alignment.center,
+        child: Column(
           children: [
+            const SizedBox(height: 30),
             Container(
-              width: 380,
-              height: 600,
-              padding: const EdgeInsets.all(30),
-              decoration: BoxDecoration(
-                color: Colors.purple[100],
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.black),
-              ),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              color: Color(0xFFD9AFFF),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   const Text(
-                    'DIÁRIO DE SAÚDE',
+                    "DIÁRIO DE SAÚDE",
                     style: TextStyle(
-                      fontFamily: 'Cinzel Decorative',
-                      fontSize: 28,
-                      color: Colors.black,
+                      fontFamily: 'CinzelDecorative',
+                      fontSize: 22,
+                      color: Colors.black87,
                     ),
                   ),
-                  Image.asset(
-                    'assets/images/saude.png',
-                    width: 120,
-                    height: 120,
-                  ),
-                  _buildBotao('MONITORAR HIDRATAÇÃO'),
-                  _buildBotao('MONITORAR MEDICAÇÃO'),
-                  _buildBotao('MONITORAR EXERCÍCIO'),
-                  _buildBotao('MONITORAR DESCANSO'),
-                  ElevatedButton(
-                    onPressed: _confirmarSaida,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: const BorderSide(color: Colors.black),
-                      ),
-                    ),
-                    child: const Text(
-                      'SAIR',
-                      style: TextStyle(
-                        fontFamily: 'Della Respira',
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    'Criado por:\n'
-                    'Camilo Sebastian Lopes Miranda\n'
-                    'Niemias Vidal Medeiros\n'
-                    'Kleiton Santana de Jesus\n'
-                    'Gabriel Fernandes Marques dos Santos\n'
-                    'Luan Orlando Carvalho Lima',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Della Respira',
-                      fontSize: 10,
-                    ),
-                  ),
+                  const SizedBox(height: 8),
+                  Image.asset('assets/images/saude.png', height: 70),
                 ],
               ),
             ),
-            if (_mostrarConfirmacaoSaida) _buildConfirmacaoSaida(),
+            const SizedBox(height: 20),
+            _botao("MONITORAR HIDRATAÇÃO"),
+            _botao("MONITORAR MEDICAÇÃO"),
+            _botao("MONITORAR EXERCÍCIO"),
+            _botao("MONITORAR DESCANSO"),
+            _botao("SLA"),
+            _botao("CRÉDITOS"),
+            _botao("PERFIL"),
+            _botao("DESLOGAR",
+                onPressed: () => _mostrarConfirmacaoLogout(context)),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBotao(String texto) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          // Aqui pode colocar navegação para as telas de monitoramento
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: const BorderSide(color: Colors.black),
-          ),
-        ),
-        child: Text(
-          texto,
-          style: const TextStyle(
-            fontFamily: 'Della Respira',
-            fontSize: 14,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildConfirmacaoSaida() {
-    return Container(
-      width: 300,
-      height: 150,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.purple[100],
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.black),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          const Text(
-            'DESEJA REALMENTE SAIR?',
-            style: TextStyle(
-              fontFamily: 'Cinzel Decorative',
-              fontSize: 18,
-              color: Colors.black,
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              GestureDetector(
-                onTap: _sair,
-                child: const Text(
-                  'SIM',
-                  style: TextStyle(
-                    fontFamily: 'Della Respira',
-                    fontSize: 16,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-              Image.asset(
-                'assets/images/saude.png',
-                width: 40,
-                height: 40,
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _mostrarConfirmacaoSaida = false;
-                  });
-                },
-                child: const Text(
-                  'NÃO',
-                  style: TextStyle(
-                    fontFamily: 'Della Respira',
-                    fontSize: 16,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }

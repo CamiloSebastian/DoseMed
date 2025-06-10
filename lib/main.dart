@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'tela_login.dart';
 
@@ -11,13 +12,11 @@ class DiarioSaudeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Diário de Saúde ',
+      title: 'Diário de Saúde',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.purple,
-        scaffoldBackgroundColor: Color(0xFFE1BEE7),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(fontFamily: 'Serif', fontSize: 16),
-        ),
+        fontFamily: 'DellaRespira',
+        scaffoldBackgroundColor: Color(0xffcb92ff), // lilás de fundo
       ),
       home: const TelaLogin(),
     );
