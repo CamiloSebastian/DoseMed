@@ -83,10 +83,10 @@ class TelaZInicial extends StatelessWidget {
               width: double.infinity,
               child: const Center(
                 child: Text(
-                  'DIÁRIO DE SAÚDE',
+                  'DOSE MED',
                   style: TextStyle(
                     fontFamily: 'Voltaire',
-                    fontSize: 36,
+                    fontSize: 40,
                     color: Colors.white,
                   ),
                 ),

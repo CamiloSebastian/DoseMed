@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'tela_login.dart';
 
 void main() {
-  runApp(const DiarioDeSaudeApp());
+  runApp(const DoseMedApp());
 }
 
-class DiarioDeSaudeApp extends StatelessWidget {
-  const DiarioDeSaudeApp({super.key});
+class DoseMedApp extends StatelessWidget {
+  const DoseMedApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Diário de Saúde',
+      title: 'Dose Med',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Voltaire',

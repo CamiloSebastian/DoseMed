@@ -70,9 +70,9 @@ Você declara que leu, compreendeu e concorda com estes Termos de Uso.''',
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text(
-          'DIÁRIO DE SAÚDE',
+          'DOSE MED',
           style: TextStyle(
-            fontSize: 26,
+            fontSize: 29,
             color: Color(0xFF734444),
             fontWeight: FontWeight.bold,
           ),
@@ -81,9 +81,9 @@ Você declara que leu, compreendeu e concorda com estes Termos de Uso.''',
         Image.asset('assets/images/medasiatCORT.png', height: 200),
         const SizedBox(height: 24),
         const Text(
-          'Diário de Saúde, venha monitorar\nsua vida de uma forma simples e\nprática',
+          'Dose Med, sua rotina de saúde, no tempo certo',
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, color: Color(0xFF734444)),
+          style: TextStyle(fontSize: 20, color: Color(0xFF734444)),
         ),
         const SizedBox(height: 32),
         ElevatedButton(
