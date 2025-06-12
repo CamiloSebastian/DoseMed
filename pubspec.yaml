@@ -47,6 +47,9 @@ flutter:
     - family: DellaRespira
       fonts:
         - asset: assets/fonts/DellaRespira-Regular.ttf
+    - family: Voltaire
+      fonts:
+        - asset: assets/fonts/Voltaire-Regular.ttf
 
   assets:
     - assets/images/sapatoverde.png
@@ -57,7 +60,13 @@ flutter:
     - assets/images/bemestar.png
     - assets/images/saude.png
     - assets/images/3dmedica.png
+    - assets/images/lara.png
+    - assets/images/maca.png
     - assets/images/medasiat.png
     - assets/images/medasiat2.png
     - assets/images/medasiatCORT.png
     - assets/images/medasiat2COR.png
+    - assets/images/engrenagem.png
+    - assets/images/engrenagemM.png
+    - assets/images/perfil.png
+    - assets/images/coracao.png

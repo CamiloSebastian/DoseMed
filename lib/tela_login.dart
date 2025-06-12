@@ -9,233 +9,207 @@ class TelaLogin extends StatefulWidget {
 }
 
 class _TelaLoginState extends State<TelaLogin> {
-  void _abrirCriarConta() {
+  int modo = 0; // 0: início, 1: login, 2: criar conta
+
+  final Color rosa = const Color(0xFFFFB8B8);
+  final Color marrom = const Color(0xFF734444);
+
+  bool termosAceitos = false;
+
+  // Controladores
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController senhaController = TextEditingController();
+  final TextEditingController nomeController = TextEditingController();
+  final TextEditingController confirmarSenhaController =
+      TextEditingController();
+
+  void mostrarTermosUso() {
     showDialog(
       context: context,
-      builder: (_) => Dialog(
-        backgroundColor: const Color(0xFFEEDCFF),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: CriarContaWidget(onVoltar: () => Navigator.pop(context)),
-      ),
-    );
-  }
-
-  void _abrirLogin() {
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: const Color(0xFFEEDCFF),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: const LoginWidget(),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 40),
-              Text(
-                'DIÁRIO DE SAÚDE',
-                style: const TextStyle(
-                  fontFamily: 'CinzelDecorative',
-                  fontSize: 24,
-                  color: Color(0xff574a5e),
-                  backgroundColor: Color(0xFFD9A9FF),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Image.asset('assets/images/medasiatCORT.png', height: 200),
-              const SizedBox(height: 20),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 40),
-                child: Text(
-                  'Diário de Saúde, venha monitorar sua vida de uma forma simples e prática',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'Vollkorn',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _abrirLogin,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.deepPurple,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-                ),
-                child: const Text('LOGIN'),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _abrirCriarConta,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.deepPurple,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-                ),
-                child: const Text('CRIAR CONTA'),
-              ),
-              const SizedBox(height: 30),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
-                child: Text(
-                  'Criado por:\nCamilo Sebastian Lopes Miranda\nNeemias Vidal Medeiros\nKleiton Santana de Jesus\nGabriel Fernandes Marques dos Santos\nLuan Orlando Carvalho Lima',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, fontFamily: 'Vollkorn'),
-                ),
-              ),
-              const SizedBox(height: 40),
-            ],
+      builder: (context) => AlertDialog(
+        backgroundColor: rosa,
+        title: const Text(
+          'TERMOS DE USO',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Color(0xFF734444),
+            fontWeight: FontWeight.bold,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class LoginWidget extends StatelessWidget {
-  const LoginWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Image.asset('assets/images/bemestar.png', height: 60),
-        const SizedBox(height: 10),
-        const Text("COLOQUE SEU EMAIL:",
-            style: TextStyle(fontFamily: 'Vollkorn')),
-        const TextField(),
-        const SizedBox(height: 10),
-        const Text("COLOQUE SUA SENHA",
-            style: TextStyle(fontFamily: 'Vollkorn')),
-        const TextField(obscureText: true),
-        const SizedBox(height: 10),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop(); // Fecha o diálogo de login
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => TelaZInicial()),
-            );
-          },
-          child: const Text("CONFIRMAR"),
+        content: SingleChildScrollView(
+          child: Text(
+            '''Ao utilizar este aplicativo, você concorda com os seguintes termos: 
+Este serviço tem como objetivo oferecer lembretes e metas voltadas ao bem-estar, como ingestão de água, descanso, exercícios físicos e horários de medicação. 
+O uso contínuo do aplicativo representa sua aceitação total destes termos. O conteúdo fornecido tem caráter apenas informativo e de apoio, e não deve ser considerado 
+como orientação médica, diagnóstico ou tratamento. Recomendamos sempre buscar a orientação de profissionais de saúde qualificados. Você é responsável pelas informações 
+inseridas, pela configuração dos lembretes e pelo uso adequado do aplicativo. O Diário de Saúde não se responsabiliza por atrasos, falhas técnicas, esquecimentos ou quaisquer 
+danos decorrentes do uso ou da impossibilidade de uso da plataforma. Podemos, a qualquer momento e sem aviso prévio, modificar, suspender ou encerrar funcionalidades do serviço, bem como 
+alterar estes termos. O uso contínuo após alterações será considerado aceitação dos novos termos. Ao seguir utilizando o aplicativo, você declara que leu, compreendeu e concorda com estes Termos de Uso.
+Você declara que leu, compreendeu e concorda com estes Termos de Uso.''',
+            style: TextStyle(color: marrom),
+            textAlign: TextAlign.justify,
+          ),
         ),
-      ],
-    );
-  }
-}
-
-class CriarContaWidget extends StatefulWidget {
-  final VoidCallback onVoltar;
-
-  const CriarContaWidget({required this.onVoltar, super.key});
-
-  @override
-  State<CriarContaWidget> createState() => _CriarContaWidgetState();
-}
-
-class _CriarContaWidgetState extends State<CriarContaWidget> {
-  bool aceitarTermos = false;
-
-  void _mostrarTermos() {
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        backgroundColor: const Color(0xFFEEDCFF),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: const TermosDeUsoWidget(),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset('assets/images/bemestar.png', height: 60),
-          const SizedBox(height: 10),
-          const Text("COLOQUE SEU EMAIL:",
-              style: TextStyle(fontFamily: 'Vollkorn')),
-          const TextField(),
-          const SizedBox(height: 10),
-          const Text("CRIE UMA SENHA",
-              style: TextStyle(fontFamily: 'Vollkorn')),
-          const TextField(obscureText: true),
-          const SizedBox(height: 10),
-          const Text("CONFIRME SUA SENHA",
-              style: TextStyle(fontFamily: 'Vollkorn')),
-          const TextField(obscureText: true),
-          Row(
-            children: [
-              Checkbox(
-                value: aceitarTermos,
-                onChanged: (value) {
-                  setState(() {
-                    aceitarTermos = value!;
-                  });
-                },
+        actions: [
+          Center(
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'FECHAR',
+                style: TextStyle(color: Color(0xFF734444)),
               ),
-              const Text("ACEITO OS TERMOS DE USO",
-                  style: TextStyle(fontFamily: 'Vollkorn')),
-              TextButton(
-                onPressed: _mostrarTermos,
-                child: const Text("Ver"),
-              ),
-            ],
-          ),
-          ElevatedButton(
-            onPressed: aceitarTermos ? () => Navigator.pop(context) : null,
-            child: const Text("CONFIRMAR"),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class TermosDeUsoWidget extends StatelessWidget {
-  const TermosDeUsoWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: const [
-          Text(
-            "TERMOS DE USO",
-            style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Vollkorn'),
-          ),
-          SizedBox(height: 10),
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              """Ao utilizar este aplicativo/plataforma, você concorda com os seguintes termos e condições. Este serviço tem como finalidade fornecer lembretes e metas relacionadas a práticas de bem-estar, incluindo, mas não se limitando a, ingestão de água, períodos de descanso, prática de exercícios físicos e horários de medicação. O uso contínuo do aplicativo constitui aceitação integral e irrestrita destes termos. O conteúdo disponibilizado possui caráter informativo e de apoio, não devendo ser interpretado como aconselhamento médico, diagnóstico ou tratamento. Recomendamos sempre a consulta com profissionais da saúde habilitados para orientações específicas. O usuário reconhece que é inteiramente responsável pelas informações fornecidas, pela configuração de lembretes e pelo uso adequado do aplicativo. O Diário de Saúde não se responsabiliza por atrasos, falhas técnicas, esquecimentos, ou eventuais danos decorrentes do uso ou da incapacidade de uso da plataforma. Reservamo-nos o direito de modificar, suspender ou descontinuar, a qualquer momento e sem aviso prévio, qualquer funcionalidade ou aspecto do serviço. Também poderemos alterar estes termos a qualquer momento. O uso contínuo após qualquer modificação será considerado aceitação dos novos termos. Ao continuar, você declara que leu, compreendeu e concorda com estes Termos de Uso.""",
-              textAlign: TextAlign.justify,
-              style: TextStyle(fontFamily: 'Vollkorn'),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget buildInicio() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'DIÁRIO DE SAÚDE',
+          style: TextStyle(
+            fontSize: 26,
+            color: Color(0xFF734444),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Image.asset('assets/images/medasiatCORT.png', height: 200),
+        const SizedBox(height: 24),
+        const Text(
+          'Diário de Saúde, venha monitorar\nsua vida de uma forma simples e\nprática',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 18, color: Color(0xFF734444)),
+        ),
+        const SizedBox(height: 32),
+        ElevatedButton(
+          onPressed: () => setState(() => modo = 1),
+          style: estiloBotao(),
+          child: const Text('LOGIN'),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: () => setState(() => modo = 2),
+          style: estiloBotao(),
+          child: const Text('CRIAR CONTA'),
+        ),
+      ],
+    );
+  }
+
+  Widget buildLogin() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset('assets/images/medasiatCORT.png', height: 220),
+        const SizedBox(height: 24),
+        campoTexto('COLOQUE SEU EMAIL:', emailController),
+        const SizedBox(height: 16),
+        campoTexto('COLOQUE SUA SENHA', senhaController, isSenha: true),
+        const SizedBox(height: 32),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const TelaZInicial()),
+            );
+          },
+          style: estiloBotao(),
+          child: const Text('CONFIRMAR'),
+        ),
+      ],
+    );
+  }
+
+  Widget buildCriarConta() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        campoTexto('COLOQUE SEU EMAIL:', emailController),
+        const SizedBox(height: 12),
+        campoTexto('CRIE UM NOME:', nomeController),
+        const SizedBox(height: 12),
+        campoTexto('CRIE UMA SENHA', senhaController, isSenha: true),
+        const SizedBox(height: 12),
+        campoTexto('CONFIRME SUA SENHA', confirmarSenhaController,
+            isSenha: true),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Checkbox(
+              value: termosAceitos,
+              onChanged: (val) => setState(() => termosAceitos = val ?? false),
+              activeColor: marrom,
+            ),
+            GestureDetector(
+              onTap: mostrarTermosUso,
+              child: const Text(
+                'ACEITO OS TERMOS DE USO',
+                style: TextStyle(color: Color(0xFF734444)),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ElevatedButton(
+          onPressed: () => setState(() => modo = 0),
+          style: estiloBotao(),
+          child: const Text('CONFIRMAR'),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget conteudo;
+    if (modo == 1) {
+      conteudo = buildLogin();
+    } else if (modo == 2) {
+      conteudo = buildCriarConta();
+    } else {
+      conteudo = buildInicio();
+    }
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFB8B8),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: conteudo,
+          ),
+        ),
+      ),
+    );
+  }
+
+  TextField campoTexto(String label, TextEditingController controller,
+      {bool isSenha = false}) {
+    return TextField(
+      controller: controller,
+      obscureText: isSenha,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Color(0xFF734444), fontSize: 20),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      style: const TextStyle(color: Color(0xFF734444)),
+    );
+  }
+
+  ButtonStyle estiloBotao() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: Colors.white,
+      foregroundColor: const Color(0xFF734444),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      minimumSize: const Size(double.infinity, 48),
     );
   }
 }

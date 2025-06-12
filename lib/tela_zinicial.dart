@@ -1,139 +1,263 @@
 import 'package:flutter/material.dart';
-import 'tela_login.dart'; // Certifique-se de importar corretamente
+import 'tela_login.dart';
 
 class TelaZInicial extends StatelessWidget {
-  const TelaZInicial({super.key});
+  const TelaZInicial({Key? key}) : super(key: key);
 
-  void _mostrarConfirmacaoLogout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFFD9AFFF),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                width: double.infinity,
-                child: Text(
-                  "DESEJA REALMENTE SAIR?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'CinzelDecorative',
-                    fontSize: 18,
-                    color: Colors.black87,
+  @override
+  Widget build(BuildContext context) {
+    const rosaClaro = Color(0xFFF8C6C6);
+    const roxoTexto = Color(0xFF4B3B4D);
+    const corBola = Color(0xFFB07070); // mesma cor dos ícones
+
+    return Scaffold(
+      drawer: Drawer(
+        child: Column(
+          children: [
+            Container(
+              color: rosaClaro,
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: corBola,
+                    child: Text(
+                      'L',
+                      style: TextStyle(
+                        fontFamily: 'Voltaire',
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Image.asset('assets/images/saude.png', height: 60),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => TelaLogin()),
-                        (route) => false,
-                      );
-                    },
-                    child: const Text("SIM",
-                        style: TextStyle(
-                            fontFamily: 'Vollkorn',
-                            fontSize: 16,
-                            color: Colors.black)),
+                  SizedBox(height: 12),
+                  Text(
+                    'nickdocriarconta',
+                    style: TextStyle(
+                      fontFamily: 'Voltaire',
+                      fontSize: 14,
+                      color: roxoTexto,
+                    ),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text("NÃO",
-                        style: TextStyle(
-                            fontFamily: 'Vollkorn',
-                            fontSize: 16,
-                            color: Colors.black)),
+                  Text(
+                    'gmaildaqueapessoaefezlogin',
+                    style: TextStyle(
+                      fontFamily: 'Voltaire',
+                      fontSize: 14,
+                      color: roxoTexto,
+                    ),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+            _DrawerItem(texto: 'PERFIL', onTap: () {}),
+            _DrawerItem(texto: 'CRÉDITOS', onTap: () {}),
+            _DrawerItem(texto: 'CONFIGURAÇÕES', onTap: () {}),
+            _DrawerItem(
+              texto: 'DESLOGAR',
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => _ConfirmarSaidaDialog(context),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+      appBar: AppBar(
+        backgroundColor: rosaClaro,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              color: rosaClaro,
+              width: double.infinity,
+              child: const Center(
+                child: Text(
+                  'DIÁRIO DE SAÚDE',
+                  style: TextStyle(
+                    fontFamily: 'Voltaire',
+                    fontSize: 36,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Column(
+                children: [
+                  Image.asset(
+                    'assets/images/coracao.png',
+                    height: 50,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'REMÉDIOS TOMADOS\n0/10',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Voltaire',
+                      fontSize: 16,
+                      color: roxoTexto,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            BotaoMenu(texto: 'TOMAR REMÉDIO', onPressed: () {}),
+            const SizedBox(height: 16),
+            BotaoMenu(texto: 'CRONOGRAMAS/LEMBRETES', onPressed: () {}),
+            const SizedBox(height: 16),
+            BotaoMenu(texto: 'CRIAR CRONOGRAMA', onPressed: () {}),
+            const SizedBox(height: 16),
+            BotaoMenu(texto: 'CRIAR LEMBRETE', onPressed: () {}),
+          ],
         ),
       ),
     );
   }
 
-  Widget _botao(String texto, {VoidCallback? onPressed}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+  // Diálogo personalizado
+  Widget _ConfirmarSaidaDialog(BuildContext context) {
+    const rosaClaro = Color(0xFFF8C6C6);
+    const roxoTexto = Color(0xFF4B3B4D);
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      titlePadding: EdgeInsets.zero,
+      contentPadding: EdgeInsets.zero,
+      title: Container(
+        padding: const EdgeInsets.all(16),
+        color: rosaClaro,
+        child: const Text(
+          'DESEJA REALMENTE SAIR?',
+          style: TextStyle(
+            fontFamily: 'Voltaire',
+            fontSize: 18,
+            color: roxoTexto,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+      content: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const TelaLogin()),
+              );
+            },
+            child: const Text(
+              'SIM',
+              style: TextStyle(
+                fontFamily: 'Voltaire',
+                fontSize: 18,
+                color: roxoTexto,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Fecha apenas o diálogo
+            },
+            child: const Text(
+              'NÃO',
+              style: TextStyle(
+                fontFamily: 'Voltaire',
+                fontSize: 18,
+                color: roxoTexto,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BotaoMenu extends StatelessWidget {
+  final String texto;
+  final VoidCallback onPressed;
+
+  const BotaoMenu({
+    super.key,
+    required this.texto,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const roxoTexto = Color(0xFF4B3B4D);
+    const rosaClaro = Color(0xFFF8C6C6);
+
+    return SizedBox(
+      width: 220,
+      height: 40,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFF0C8FF),
-          foregroundColor: Colors.black,
+          backgroundColor: rosaClaro,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(8),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+          elevation: 0,
         ),
         onPressed: onPressed,
         child: Text(
           texto,
           style: const TextStyle(
-            fontFamily: 'Vollkorn',
+            fontFamily: 'Voltaire',
             fontSize: 16,
+            color: roxoTexto,
           ),
         ),
       ),
     );
   }
+}
+
+class _DrawerItem extends StatelessWidget {
+  final String texto;
+  final VoidCallback onTap;
+
+  const _DrawerItem({required this.texto, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFF6F4F7),
-      body: Center(
-        child: Column(
-          children: [
-            const SizedBox(height: 30),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              color: Color(0xFFD9AFFF),
-              child: Column(
-                children: [
-                  const Text(
-                    "DIÁRIO DE SAÚDE",
-                    style: TextStyle(
-                      fontFamily: 'CinzelDecorative',
-                      fontSize: 22,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Image.asset('assets/images/saude.png', height: 70),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            _botao("MONITORAR HIDRATAÇÃO"),
-            _botao("MONITORAR MEDICAÇÃO"),
-            _botao("MONITORAR EXERCÍCIO"),
-            _botao("MONITORAR DESCANSO"),
-            _botao("SLA"),
-            _botao("CRÉDITOS"),
-            _botao("PERFIL"),
-            _botao("DESLOGAR",
-                onPressed: () => _mostrarConfirmacaoLogout(context)),
-          ],
+    const roxoTexto = Color(0xFF4B3B4D);
+    const corBola = Color(0xFFB07070);
+
+    return ListTile(
+      leading: const CircleAvatar(
+        radius: 12,
+        backgroundColor: corBola,
+      ),
+      title: Text(
+        texto,
+        style: const TextStyle(
+          fontFamily: 'Voltaire',
+          fontSize: 16,
+          color: roxoTexto,
         ),
       ),
+      onTap: onTap,
     );
   }
 }
