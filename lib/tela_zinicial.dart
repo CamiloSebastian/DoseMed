@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'tela_login.dart';
+import 'lembrecrono.dart';
+import 'criar_lemb.dart';
+import 'criar_crono.dart';
 
 class TelaZInicial extends StatelessWidget {
   const TelaZInicial({Key? key}) : super(key: key);
@@ -123,11 +126,32 @@ class TelaZInicial extends StatelessWidget {
             const SizedBox(height: 32),
             BotaoMenu(texto: 'TOMAR REMÉDIO', onPressed: () {}),
             const SizedBox(height: 16),
-            BotaoMenu(texto: 'CRONOGRAMAS/LEMBRETES', onPressed: () {}),
+            BotaoMenu(
+              texto: 'CRONOGRAMAS/LEMBRETES',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const LembreCrono()),
+                );
+              },
+            ),
             const SizedBox(height: 16),
-            BotaoMenu(texto: 'CRIAR CRONOGRAMA', onPressed: () {}),
+            BotaoMenu(
+              texto: 'CRIAR CRONOGRAMA',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const CriarCrono()),
+                );
+              },
+            ),
             const SizedBox(height: 16),
-            BotaoMenu(texto: 'CRIAR LEMBRETE', onPressed: () {}),
+            BotaoMenu(
+              texto: 'CRIAR LEMBRETE',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const CriarLemb()),
+                );
+              },
+            ),
           ],
         ),
       ),
