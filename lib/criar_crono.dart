@@ -108,6 +108,7 @@ class CriarCrono extends StatelessWidget {
                       'nome': nome,
                       'quantidadePorDia': quantidade,
                       'tomados': 0,
+                      'userId': user.uid, // *** ESSENCIAL PARA FILTRAR ***
                       'createdAt': FieldValue.serverTimestamp(),
                     });
 

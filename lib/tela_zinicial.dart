@@ -5,6 +5,7 @@ import 'tela_login.dart';
 import 'lembrecrono.dart';
 import 'criar_lemb.dart';
 import 'criar_crono.dart';
+import 'telaz_credito.dart';
 
 class TelaZInicial extends StatefulWidget {
   const TelaZInicial({Key? key}) : super(key: key);
@@ -50,7 +51,35 @@ class _TelaZInicialState extends State<TelaZInicial> {
           cronogramaSelecionado =
               Map<String, dynamic>.from(doc.data()!['cronogramaSelecionado']);
         });
+
+        await verificarResetTomados();
       }
+    }
+  }
+
+  Future<void> verificarResetTomados() async {
+    if (user == null || cronogramaSelecionado == null) return;
+
+    final hojeStr = DateTime.now().toIso8601String().substring(0, 10); // yyyy-MM-dd
+    final ultimaAtualizacao = cronogramaSelecionado!['ultimaAtualizacao'] ?? '';
+
+    if (hojeStr != ultimaAtualizacao) {
+      // Resetar tomados para 0 e atualizar a data de atualização
+      await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(user!.uid)
+          .update({
+        'cronogramaSelecionado.tomados': 0,
+        'cronogramaSelecionado.ultimaAtualizacao': hojeStr,
+      });
+
+      setState(() {
+        cronogramaSelecionado = {
+          ...cronogramaSelecionado!,
+          'tomados': 0,
+          'ultimaAtualizacao': hojeStr,
+        };
+      });
     }
   }
 
@@ -97,16 +126,43 @@ class _TelaZInicialState extends State<TelaZInicial> {
               ),
             ),
             const SizedBox(height: 16),
-            _DrawerItem(texto: 'PERFIL', onTap: () {}),
-            _DrawerItem(texto: 'CRÉDITOS', onTap: () {}),
-            _DrawerItem(texto: 'CONFIGURAÇÕES', onTap: () {}),
+_DrawerItem(
+  texto: 'CRÉDITOS',
+  onTap: () {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const TelaZCredito()),
+    );
+  },
+),
+
             _DrawerItem(
               texto: 'DESLOGAR',
               onTap: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const TelaLogin()),
+                final confirmar = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Deseja sair?'),
+                    content:
+                        const Text('Tem certeza que deseja deslogar da sua conta?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancelar'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Sair'),
+                      ),
+                    ],
+                  ),
                 );
+
+                if (confirmar == true) {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (_) => const TelaLogin()),
+                  );
+                }
               },
             ),
           ],
@@ -136,34 +192,6 @@ class _TelaZInicialState extends State<TelaZInicial> {
               ),
             ),
             const SizedBox(height: 32),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 32),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Column(
-                children: [
-                  Image.asset(
-                    'assets/images/coracao.png',
-                    height: 50,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'REMÉDIOS TOMADOS\n$totalRegistros',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: 'Voltaire',
-                      fontSize: 16,
-                      color: roxoTexto,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
             if (cronogramaSelecionado != null) ...[
               const SizedBox(height: 16),
               Container(
@@ -184,7 +212,7 @@ class _TelaZInicialState extends State<TelaZInicial> {
                       ),
                     ),
                     Text(
-                      '${cronogramaSelecionado!['nome']} (${cronogramaSelecionado!['qtd']}/dia)',
+                      '${cronogramaSelecionado!['nome']} (${cronogramaSelecionado!['tomados'] ?? 0}/${cronogramaSelecionado!['quantidadePorDia'] ?? 0} dia)',
                       style: const TextStyle(
                         fontFamily: 'Voltaire',
                         fontSize: 16,
@@ -197,76 +225,79 @@ class _TelaZInicialState extends State<TelaZInicial> {
             ],
 
             const SizedBox(height: 32),
-BotaoMenu(
-  texto: 'TOMAR REMÉDIO',
-  onPressed: () async {
-    if (cronogramaSelecionado == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nenhum cronograma selecionado.')),
-      );
-      return;
-    }
+            BotaoMenu(
+              texto: 'TOMAR REMÉDIO',
+              onPressed: () async {
+                if (cronogramaSelecionado == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Nenhum cronograma selecionado.')),
+                  );
+                  return;
+                }
 
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar dose?'),
-        content: Text(
-          'Deseja registrar uma dose para o cronograma "${cronogramaSelecionado!['nome']}"?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Confirmar'),
-          ),
-        ],
-      ),
-    );
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Confirmar dose?'),
+                    content: Text(
+                      'Deseja registrar uma dose para o cronograma "${cronogramaSelecionado!['nome']}"?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancelar'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Confirmar'),
+                      ),
+                    ],
+                  ),
+                );
 
-    if (confirm != true) return;
+                if (confirm != true) return;
 
-    final maxQtd = cronogramaSelecionado!['qtd'] ?? 0;
-    final atual = cronogramaSelecionado!['tomados'] ?? 0;
+                final maxQtd = cronogramaSelecionado!['quantidadePorDia'] ?? 0;
+                final atual = cronogramaSelecionado!['tomados'] ?? 0;
 
-    if (atual >= maxQtd) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Você já tomou todas as doses hoje.')),
-      );
-      return;
-    }
+                if (atual >= maxQtd) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Você já tomou todas as doses hoje.')),
+                  );
+                  return;
+                }
 
-    final novoTomados = atual + 1;
+                final novoTomados = atual + 1;
 
-    // Atualiza cronogramaSelecionado no Firestore
-    await FirebaseFirestore.instance
-        .collection('usuarios')
-        .doc(user!.uid)
-        .update({
-      'cronogramaSelecionado.tomados': novoTomados,
-    });
+                // Atualiza cronogramaSelecionado no Firestore
+                await FirebaseFirestore.instance
+                    .collection('usuarios')
+                    .doc(user!.uid)
+                    .update({
+                  'cronogramaSelecionado.tomados': novoTomados,
+                });
 
-    // Adiciona registro
-    await FirebaseFirestore.instance.collection('registros').add({
-      'uid': user!.uid,
-      'data': DateTime.now(),
-      'nomeCronograma': cronogramaSelecionado!['nome'],
-    });
+                // Adiciona registro
+                await FirebaseFirestore.instance.collection('registros').add({
+                  'uid': user!.uid,
+                  'data': DateTime.now(),
+                  'nomeCronograma': cronogramaSelecionado!['nome'],
+                });
 
-    // Atualiza localmente
-    setState(() {
-      cronogramaSelecionado!['tomados'] = novoTomados;
-      totalRegistros += 1;
-    });
+                // Atualiza localmente o estado
+                setState(() {
+                  cronogramaSelecionado = {
+                    ...cronogramaSelecionado!,
+                    'tomados': novoTomados,
+                  };
+                  totalRegistros += 1;
+                });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Dose registrada com sucesso.')),
-    );
-  },
-),
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Dose registrada com sucesso.')),
+                );
+              },
+            ),
 
             const SizedBox(height: 16),
             BotaoMenu(

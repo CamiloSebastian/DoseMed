@@ -13,8 +13,15 @@ class LembreCrono extends StatefulWidget {
 class _LembreCronoState extends State<LembreCrono> {
   final userId = FirebaseAuth.instance.currentUser?.uid;
 
-  Future<void> deletarDocumento(String id, String colecao) async {
-    await FirebaseFirestore.instance.collection(colecao).doc(id).delete();
+  Future<void> deletarDocumento(String id, String subcolecao) async {
+    if (userId == null) return;
+
+    await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(userId)
+        .collection(subcolecao)
+        .doc(id)
+        .delete();
   }
 
   Future<void> definirCronogramaAtivo(Map<String, dynamic> cronograma) async {
@@ -38,7 +45,7 @@ class _LembreCronoState extends State<LembreCrono> {
       ),
       subtitle: tipo == 'lembretes'
           ? Text('Horário: ${data['horario'] ?? '---'}')
-          : Text('Qtd/dia: ${data['qtd'] ?? '---'}'),
+          : Text('Qtd/dia: ${data['quantidadePorDia'] ?? '---'}'),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -64,11 +71,16 @@ class _LembreCronoState extends State<LembreCrono> {
     );
   }
 
-  Widget buildLista(String colecao) {
+  Widget buildLista(String subcolecao) {
+    if (userId == null) {
+      return const Text('Usuário não autenticado');
+    }
+
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
-          .collection(colecao)
-          .where('userId', isEqualTo: userId)
+          .collection('usuarios')
+          .doc(userId)
+          .collection(subcolecao)
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const CircularProgressIndicator();
@@ -79,7 +91,7 @@ class _LembreCronoState extends State<LembreCrono> {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Text(
-              colecao == 'lembretes'
+              subcolecao == 'lembretes'
                   ? 'Nenhum lembrete criado.'
                   : 'Nenhum cronograma criado.',
               style: const TextStyle(fontFamily: 'Voltaire', fontSize: 14),
@@ -91,7 +103,7 @@ class _LembreCronoState extends State<LembreCrono> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: docs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            return buildItemTile(data, doc.id, colecao);
+            return buildItemTile(data, doc.id, subcolecao);
           }).toList(),
         );
       },

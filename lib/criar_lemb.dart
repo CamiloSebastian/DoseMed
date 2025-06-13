@@ -3,43 +3,57 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'tela_zinicial.dart';
 
-class CriarLemb extends StatelessWidget {
+class CriarLemb extends StatefulWidget {
   const CriarLemb({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController nomeController = TextEditingController();
-    final TextEditingController horarioController = TextEditingController();
+  State<CriarLemb> createState() => _CriarLembState();
+}
 
-    Future<void> salvarLembrete() async {
-      final String nome = nomeController.text.trim();
-      final String horario = horarioController.text.trim();
-      final user = FirebaseAuth.instance.currentUser;
+class _CriarLembState extends State<CriarLemb> {
+  final TextEditingController nomeController = TextEditingController();
+  TimeOfDay? horarioSelecionado;
 
-      if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Usuário não autenticado')),
-        );
-        return;
-      }
-      if (nome.isEmpty || horario.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Preencha todos os campos!')),
-        );
-        return;
-      }
+  Future<void> salvarLembrete() async {
+    final String nome = nomeController.text.trim();
+    final user = FirebaseAuth.instance.currentUser;
 
-      await FirebaseFirestore.instance
-          .collection('usuarios')
-          .doc(user.uid)
-          .collection('lembretes')
-          .add({
-        'nome': nome,
-        'horario': horario,
-        'criadoEm': FieldValue.serverTimestamp(),
-      });
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Usuário não autenticado')),
+      );
+      return;
+    }
+    if (nome.isEmpty || horarioSelecionado == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha todos os campos!')),
+      );
+      return;
     }
 
+    final horarioFormatado =
+        '${horarioSelecionado!.hour.toString().padLeft(2, '0')}:${horarioSelecionado!.minute.toString().padLeft(2, '0')}';
+
+    await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(user.uid)
+        .collection('lembretes')
+        .add({
+      'nome': nome,
+      'horario': horarioFormatado,
+      'userId': user.uid,  // *** ESSENCIAL PARA FILTRAR ***
+      'criadoEm': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
+  void dispose() {
+    nomeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFE5E5),
       body: SafeArea(
@@ -86,9 +100,28 @@ class CriarLemb extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
-              child: TextField(
-                controller: horarioController,
-                decoration: const InputDecoration(border: OutlineInputBorder()),
+              child: TextButton(
+                onPressed: () async {
+                  final TimeOfDay? escolhido = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (escolhido != null) {
+                    setState(() {
+                      horarioSelecionado = escolhido;
+                    });
+                  }
+                },
+                child: Text(
+                  horarioSelecionado == null
+                      ? 'Selecionar horário'
+                      : '${horarioSelecionado!.hour.toString().padLeft(2, '0')}:${horarioSelecionado!.minute.toString().padLeft(2, '0')}',
+                  style: const TextStyle(
+                    fontFamily: 'Voltaire',
+                    fontSize: 16,
+                    color: Color(0xFF734F50),
+                  ),
+                ),
               ),
             ),
             const Spacer(),
