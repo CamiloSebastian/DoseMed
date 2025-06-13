@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'tela_zinicial.dart';
 
 class TelaLogin extends StatefulWidget {
@@ -20,8 +21,7 @@ class _TelaLoginState extends State<TelaLogin> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController senhaController = TextEditingController();
   final TextEditingController nomeController = TextEditingController();
-  final TextEditingController confirmarSenhaController =
-      TextEditingController();
+  final TextEditingController confirmarSenhaController = TextEditingController();
 
   void mostrarTermosUso() {
     showDialog(
@@ -44,8 +44,7 @@ O uso contínuo do aplicativo representa sua aceitação total destes termos. O 
 como orientação médica, diagnóstico ou tratamento. Recomendamos sempre buscar a orientação de profissionais de saúde qualificados. Você é responsável pelas informações 
 inseridas, pela configuração dos lembretes e pelo uso adequado do aplicativo. O Diário de Saúde não se responsabiliza por atrasos, falhas técnicas, esquecimentos ou quaisquer 
 danos decorrentes do uso ou da impossibilidade de uso da plataforma. Podemos, a qualquer momento e sem aviso prévio, modificar, suspender ou encerrar funcionalidades do serviço, bem como 
-alterar estes termos. O uso contínuo após alterações será considerado aceitação dos novos termos. Ao seguir utilizando o aplicativo, você declara que leu, compreendeu e concorda com estes Termos de Uso.
-Você declara que leu, compreendeu e concorda com estes Termos de Uso.''',
+alterar estes termos. O uso contínuo após alterações será considerado aceitação dos novos termos. Ao seguir utilizando o aplicativo, você declara que leu, compreendeu e concorda com estes Termos de Uso.''',
             style: TextStyle(color: marrom),
             textAlign: TextAlign.justify,
           ),
@@ -112,11 +111,22 @@ Você declara que leu, compreendeu e concorda com estes Termos de Uso.''',
         campoTexto('COLOQUE SUA SENHA', senhaController, isSenha: true),
         const SizedBox(height: 32),
         ElevatedButton(
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const TelaZInicial()),
-            );
+          onPressed: () async {
+            try {
+              await FirebaseAuth.instance.signInWithEmailAndPassword(
+                email: emailController.text.trim(),
+                password: senhaController.text,
+              );
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const TelaZInicial()),
+              );
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Erro ao fazer login: ${e.toString()}')),
+              );
+            }
           },
           style: estiloBotao(),
           child: const Text('CONFIRMAR'),
@@ -135,8 +145,7 @@ Você declara que leu, compreendeu e concorda com estes Termos de Uso.''',
         const SizedBox(height: 12),
         campoTexto('CRIE UMA SENHA', senhaController, isSenha: true),
         const SizedBox(height: 12),
-        campoTexto('CONFIRME SUA SENHA', confirmarSenhaController,
-            isSenha: true),
+        campoTexto('CONFIRME SUA SENHA', confirmarSenhaController, isSenha: true),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -156,7 +165,44 @@ Você declara que leu, compreendeu e concorda com estes Termos de Uso.''',
         ),
         const SizedBox(height: 12),
         ElevatedButton(
-          onPressed: () => setState(() => modo = 0),
+          onPressed: () async {
+            if (!termosAceitos) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Você precisa aceitar os termos de uso')),
+              );
+              return;
+            }
+
+            final email = emailController.text.trim();
+            final senha = senhaController.text;
+            final confirmar = confirmarSenhaController.text;
+
+            if (senha != confirmar) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('As senhas não coincidem')),
+              );
+              return;
+            }
+
+            try {
+              await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                email: email,
+                password: senha,
+              );
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Conta criada com sucesso!')),
+              );
+
+              setState(() {
+                modo = 0; // Volta pra tela inicial
+              });
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Erro: ${e.toString()}')),
+              );
+            }
+          },
           style: estiloBotao(),
           child: const Text('CONFIRMAR'),
         ),
@@ -188,8 +234,7 @@ Você declara que leu, compreendeu e concorda com estes Termos de Uso.''',
     );
   }
 
-  TextField campoTexto(String label, TextEditingController controller,
-      {bool isSenha = false}) {
+  TextField campoTexto(String label, TextEditingController controller, {bool isSenha = false}) {
     return TextField(
       controller: controller,
       obscureText: isSenha,

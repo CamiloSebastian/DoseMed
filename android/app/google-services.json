@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "43789366260",
+    "project_id": "dosemed-17d2a",
+    "storage_bucket": "dosemed-17d2a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:43789366260:android:31bf5a11aee2044d0e7fa1",
+        "android_client_info": {
+          "package_name": "com.example.diariosaude"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdoDNVbXcs46luoyDnJTcziq7A9ak9BDc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'tela_zinicial.dart';
 
@@ -8,6 +10,35 @@ class CriarLemb extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextEditingController nomeController = TextEditingController();
     final TextEditingController horarioController = TextEditingController();
+
+    Future<void> salvarLembrete() async {
+      final String nome = nomeController.text.trim();
+      final String horario = horarioController.text.trim();
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Usuário não autenticado')),
+        );
+        return;
+      }
+      if (nome.isEmpty || horario.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Preencha todos os campos!')),
+        );
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(user.uid)
+          .collection('lembretes')
+          .add({
+        'nome': nome,
+        'horario': horario,
+        'criadoEm': FieldValue.serverTimestamp(),
+      });
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFE5E5),
@@ -76,11 +107,11 @@ class CriarLemb extends StatelessWidget {
                     vertical: 12,
                   ),
                 ),
-                onPressed: () {
-                  Navigator.push(
+                onPressed: () async {
+                  await salvarLembrete();
+                  Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const TelaZInicial()),
+                    MaterialPageRoute(builder: (context) => const TelaZInicial()),
                   );
                 },
                 child: const Text('CONFIRMAR'),

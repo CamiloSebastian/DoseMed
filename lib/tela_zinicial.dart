@@ -1,17 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'tela_login.dart';
 import 'lembrecrono.dart';
 import 'criar_lemb.dart';
 import 'criar_crono.dart';
 
-class TelaZInicial extends StatelessWidget {
+class TelaZInicial extends StatefulWidget {
   const TelaZInicial({Key? key}) : super(key: key);
+
+  @override
+  State<TelaZInicial> createState() => _TelaZInicialState();
+}
+
+class _TelaZInicialState extends State<TelaZInicial> {
+  final user = FirebaseAuth.instance.currentUser;
+  int totalRegistros = 0;
+  Map<String, dynamic>? cronogramaSelecionado;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarTotalRegistros();
+    _carregarCronogramaSelecionado();
+  }
+
+  Future<void> _carregarTotalRegistros() async {
+    if (user != null) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('registros')
+          .where('uid', isEqualTo: user!.uid)
+          .get();
+
+      setState(() {
+        totalRegistros = snapshot.docs.length;
+      });
+    }
+  }
+
+  Future<void> _carregarCronogramaSelecionado() async {
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(user!.uid)
+          .get();
+
+      if (doc.exists && doc.data()?['cronogramaSelecionado'] != null) {
+        setState(() {
+          cronogramaSelecionado =
+              Map<String, dynamic>.from(doc.data()!['cronogramaSelecionado']);
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     const rosaClaro = Color(0xFFF8C6C6);
     const roxoTexto = Color(0xFF4B3B4D);
-    const corBola = Color(0xFFB07070); // mesma cor dos ícones
+    const corBola = Color(0xFFB07070);
 
     return Scaffold(
       drawer: Drawer(
@@ -23,31 +70,24 @@ class TelaZInicial extends StatelessWidget {
               width: double.infinity,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  CircleAvatar(
+                children: [
+                  const CircleAvatar(
                     radius: 30,
                     backgroundColor: corBola,
-                    child: Text(
-                      'L',
-                      style: TextStyle(
-                        fontFamily: 'Voltaire',
-                        fontSize: 14,
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: Icon(Icons.person, color: Colors.white),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text(
-                    'nickdocriarconta',
-                    style: TextStyle(
+                    user?.displayName ?? 'Usuário',
+                    style: const TextStyle(
                       fontFamily: 'Voltaire',
                       fontSize: 14,
                       color: roxoTexto,
                     ),
                   ),
                   Text(
-                    'gmaildaqueapessoaefezlogin',
-                    style: TextStyle(
+                    user?.email ?? '',
+                    style: const TextStyle(
                       fontFamily: 'Voltaire',
                       fontSize: 14,
                       color: roxoTexto,
@@ -62,10 +102,10 @@ class TelaZInicial extends StatelessWidget {
             _DrawerItem(texto: 'CONFIGURAÇÕES', onTap: () {}),
             _DrawerItem(
               texto: 'DESLOGAR',
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => _ConfirmarSaidaDialog(context),
+              onTap: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const TelaLogin()),
                 );
               },
             ),
@@ -111,10 +151,10 @@ class TelaZInicial extends StatelessWidget {
                     color: Colors.red,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'REMÉDIOS TOMADOS\n0/10',
+                  Text(
+                    'REMÉDIOS TOMADOS\n$totalRegistros',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Voltaire',
                       fontSize: 16,
                       color: roxoTexto,
@@ -123,8 +163,111 @@ class TelaZInicial extends StatelessWidget {
                 ],
               ),
             ),
+
+            if (cronogramaSelecionado != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 32),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFFFF0F0),
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'CRONOGRAMA ATUAL:',
+                      style: TextStyle(
+                        fontFamily: 'Voltaire',
+                        fontSize: 14,
+                        color: Color(0xFF734F50),
+                      ),
+                    ),
+                    Text(
+                      '${cronogramaSelecionado!['nome']} (${cronogramaSelecionado!['qtd']}/dia)',
+                      style: const TextStyle(
+                        fontFamily: 'Voltaire',
+                        fontSize: 16,
+                        color: Color(0xFF734F50),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             const SizedBox(height: 32),
-            BotaoMenu(texto: 'TOMAR REMÉDIO', onPressed: () {}),
+BotaoMenu(
+  texto: 'TOMAR REMÉDIO',
+  onPressed: () async {
+    if (cronogramaSelecionado == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nenhum cronograma selecionado.')),
+      );
+      return;
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar dose?'),
+        content: Text(
+          'Deseja registrar uma dose para o cronograma "${cronogramaSelecionado!['nome']}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    final maxQtd = cronogramaSelecionado!['qtd'] ?? 0;
+    final atual = cronogramaSelecionado!['tomados'] ?? 0;
+
+    if (atual >= maxQtd) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Você já tomou todas as doses hoje.')),
+      );
+      return;
+    }
+
+    final novoTomados = atual + 1;
+
+    // Atualiza cronogramaSelecionado no Firestore
+    await FirebaseFirestore.instance
+        .collection('usuarios')
+        .doc(user!.uid)
+        .update({
+      'cronogramaSelecionado.tomados': novoTomados,
+    });
+
+    // Adiciona registro
+    await FirebaseFirestore.instance.collection('registros').add({
+      'uid': user!.uid,
+      'data': DateTime.now(),
+      'nomeCronograma': cronogramaSelecionado!['nome'],
+    });
+
+    // Atualiza localmente
+    setState(() {
+      cronogramaSelecionado!['tomados'] = novoTomados;
+      totalRegistros += 1;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Dose registrada com sucesso.')),
+    );
+  },
+),
+
             const SizedBox(height: 16),
             BotaoMenu(
               texto: 'CRONOGRAMAS/LEMBRETES',
@@ -157,75 +300,13 @@ class TelaZInicial extends StatelessWidget {
       ),
     );
   }
-
-  // Diálogo personalizado
-  Widget _ConfirmarSaidaDialog(BuildContext context) {
-    const rosaClaro = Color(0xFFF8C6C6);
-    const roxoTexto = Color(0xFF4B3B4D);
-
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      titlePadding: EdgeInsets.zero,
-      contentPadding: EdgeInsets.zero,
-      title: Container(
-        padding: const EdgeInsets.all(16),
-        color: rosaClaro,
-        child: const Text(
-          'DESEJA REALMENTE SAIR?',
-          style: TextStyle(
-            fontFamily: 'Voltaire',
-            fontSize: 18,
-            color: roxoTexto,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-      content: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const TelaLogin()),
-              );
-            },
-            child: const Text(
-              'SIM',
-              style: TextStyle(
-                fontFamily: 'Voltaire',
-                fontSize: 18,
-                color: roxoTexto,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Fecha apenas o diálogo
-            },
-            child: const Text(
-              'NÃO',
-              style: TextStyle(
-                fontFamily: 'Voltaire',
-                fontSize: 18,
-                color: roxoTexto,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class BotaoMenu extends StatelessWidget {
   final String texto;
   final VoidCallback onPressed;
 
-  const BotaoMenu({
-    super.key,
-    required this.texto,
-    required this.onPressed,
-  });
+  const BotaoMenu({super.key, required this.texto, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'tela_zinicial.dart';
 
 class CriarCrono extends StatelessWidget {
@@ -57,6 +59,7 @@ class CriarCrono extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 8),
               child: TextField(
                 controller: qtdController,
+                keyboardType: TextInputType.number,
                 decoration: const InputDecoration(border: OutlineInputBorder()),
               ),
             ),
@@ -76,12 +79,47 @@ class CriarCrono extends StatelessWidget {
                     vertical: 12,
                   ),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const TelaZInicial()),
-                  );
+                onPressed: () async {
+                  final String nome = nomeController.text.trim();
+                  final String qtd = qtdController.text.trim();
+
+                  if (nome.isEmpty || qtd.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Preencha todos os campos!')),
+                    );
+                    return;
+                  }
+
+                  final int? quantidade = int.tryParse(qtd);
+                  if (quantidade == null || quantidade <= 0) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Quantidade deve ser um número positivo')),
+                    );
+                    return;
+                  }
+
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    await FirebaseFirestore.instance
+                        .collection('usuarios')
+                        .doc(user.uid)
+                        .collection('cronogramas')
+                        .add({
+                      'nome': nome,
+                      'quantidadePorDia': quantidade,
+                      'tomados': 0,
+                      'createdAt': FieldValue.serverTimestamp(),
+                    });
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const TelaZInicial()),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Usuário não autenticado')),
+                    );
+                  }
                 },
                 child: const Text('CONFIRMAR'),
               ),
